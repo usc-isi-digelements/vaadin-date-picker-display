@@ -1,0 +1,384 @@
+<!--
+Copyright 2017 Next Century Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../lodash-import/lodash.html">
+<link rel="import" href="../moment-element/moment-with-locales-import.html">
+
+<!--
+A Polymer Element that displays a date picker used for filtering (uses vaadin-date-picker).
+
+### Example
+```js
+var facets = {
+  dates: {
+    dateStart: {},
+    dateEnd: {}
+  }
+};
+```
+
+```html
+<vaadin-date-picker-display
+  facet-key="dates"
+  facets="{{facets}}"
+  key="dateStart"
+  title="Date From"
+  prefix-label="From"
+  date-identifier="start">
+</vaadin-date-picker-display>
+```
+
+### Styling
+
+`<vaadin-date-picker-display>` provides the following custom properties and mixins
+for styling:
+
+@demo demo/index.html
+-->
+
+<dom-module id="vaadin-date-picker-display">
+  <template>
+    <style include="iron-flex"></style>
+    <div class="horizontal layout">
+      <vaadin-date-picker id="[[key]]"></vaadin-date-picker>
+      [[_createEventListener(key)]]
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'vaadin-date-picker-display',
+
+      properties: {
+        /**
+         * (Output)
+         *
+         * Date object for the filter.
+         *
+         * @type {Date}
+         * @default null
+         */
+        date: {
+          type: Date,
+          value: null,
+          notify: true
+        },
+
+        /**
+         * (Required)
+         *
+         * A key in `facets`.
+         *
+         * @type {String}
+         */
+        facetKey: {
+          type: String
+        },
+
+        /**
+         * (Optional)
+         *
+         * Format for date stored in facets[facetKey]
+         *
+         * @type {String}
+         * @default 'MM/DD/YYYY'
+         */
+        facetLabelFormat: {
+          type: String,
+          value: 'MM/DD/YYYY'
+        },
+
+        /**
+         * (Optional)
+         *
+         * Keys mapped to facet objects that persist selection state between queries.
+         *
+         * @type {Object}
+         * @default {}
+         */
+        facets: {
+          notify: true,
+          type: Object,
+          value: function() {
+            return {};
+          }
+        },
+
+        /**
+         * (Required)
+         *
+         * Unique identifier in facets[facetKey] for date object
+         *
+         * @type {String}
+         */
+        key: {
+          type: String
+        },
+
+        /**
+         * (Required)
+         *
+         * Title as it should appear in facets[facetKey]
+         *
+         * @type {String}
+         */
+        title: {
+          type: String
+        },
+
+        /**
+         * (Required)
+         *
+         * Prefix to use for label (e.g. "From" or "To")
+         *
+         * @type {String}
+         */
+        prefixLabel: {
+          type: String
+        },
+
+        /**
+         * (Required)
+         *
+         * Date identifier (e.g. "begin" or "end")
+         *
+         * @type {String}
+         */
+        dateIdentifier: {
+          type: String
+        },
+
+        /**
+         * (Optional)
+         *
+         * Facet structure to use. If function is left as default, facet structure will be as follows:
+         *
+         * {<br/>
+         *   &nbsp;&nbsp;&nbsp;&nbsp;key: this.key,<br/>
+         *   &nbsp;&nbsp;&nbsp;&nbsp;text: this.formatDate(this.date, this.facetLabelFormat) (ex: '04/04/2017'),<br/>
+         *   &nbsp;&nbsp;&nbsp;&nbsp;date: this.formatDateToESString(date) (ex: '2017-04-04T00:00:00'),<br/>
+         *   &nbsp;&nbsp;&nbsp;&nbsp;enabled: true,<br/>
+         *   &nbsp;&nbsp;&nbsp;&nbsp;category: this.title<br/>
+         * }
+         *
+         * If this is changed, note that the facetSelectionDateProperty (default: 'date') and
+         * facetSelectionEnabledProperty (default: 'enabled') are required values in this component.
+         *
+         * @type {Object}
+         * @default {{Function()}}
+         */
+        dateFacetStructure: {
+          type: Object,
+          value: function() {
+            return function() {
+              var objectToReturn = {};
+              objectToReturn.key = this.key;
+              objectToReturn.text = this.formatDate(this.date, this.facetLabelFormat);
+              objectToReturn[this.facetSelectionDateProperty] = this.formatDateToESString(this.date);
+              objectToReturn[this.facetSelectionEnabledProperty] = true;
+              objectToReturn.category = this.title;
+              return objectToReturn;
+            };
+          }
+        },
+
+        /**
+         * (Optional)
+         *
+         * Name of the date property in the facets[facetKey] object.
+         *
+         * @type {String}
+         * @default 'date'
+         */
+        facetSelectionDateProperty: {
+          type: String,
+          value: 'date'
+        },
+
+        /**
+         * (Optional)
+         *
+         * Name of the enabled property in the facets[facetKey] object.
+         *
+         * @type {String}
+         * @default 'enabled'
+         */
+        facetSelectionEnabledProperty: {
+          type: String,
+          value: 'enabled'
+        },
+
+        /**
+         * (Output)
+         *
+         * Label for current date to use on date picker button
+         *
+         * @private
+         */
+        _buttonLabel: {
+          computed: '_computeLabel(prefixLabel, dateIdentifier, date)'
+        }
+      },
+
+      observers: [
+        '_updateDisplay(key, facetKey, facets.*)'
+      ],
+
+      /**
+       * Creates a string representation of a date to use to query
+       * elasticsearch (ex: '2016-08-02T00:00:00')
+       *
+       * @param {Date} date
+       * @return {String} date as string
+       */
+      formatDateToESString: function(date) {
+        return moment(date).format('YYYY-MM-DD') + 'T00:00:00';
+      },
+
+      /**
+       * Formats date as string according to format parameter.
+       *
+       * @param {Date} date
+       * @param {String} format
+       * @return {String} date as string
+       */
+      formatDate: function(date, format) {
+        return moment(date).format(format);
+      },
+
+      /**
+       * Creates a string representation of a date to display back to the
+       * user in the following format: August 2, 2016
+       *
+       * @param {String} prefixLabel (e.g. "From" or "To")
+       * @param {String} dateIdentifier (e.g. "begin" or "end")
+       * @param {Date} date
+       * @return {String} label to display, empty string if no date exists
+       * @private
+       */
+      _computeLabel: function(prefixLabel, dateIdentifier, date) {
+        if(date) {
+          return prefixLabel + ': ' + this.formatDate(date, 'LL');
+        } else {
+          return 'Click to set ' + dateIdentifier + ' date';
+        }
+      },
+
+      /**
+       * Creates a value-changed event listener on the vaadin-date-picker-display object
+       * 
+       * @param {String} id (the id of the date object)
+       * @private
+       */
+      _createEventListener: function (id) {
+        var display = this;
+
+        async function addEvent(ms) {
+          await new Promise(resolve => setTimeout(resolve, ms));
+          var datePicker = document.querySelector('#'+id);
+          datePicker.addEventListener('value-changed', function() {
+            display._updateDate(this.value);
+          });       
+        }
+        addEvent(100);
+      },
+
+      /**
+       * Updates the facets object to indicate a selected filter
+       * based on the parameters. Will call the function specfied in 
+       * dateFacetStructure in order to do this.
+       *
+       * @param {String} key - identifier to use in facets object
+       * @private
+       */
+      _updateFacetSelection: function(key) {
+        var self = this;
+
+        var newFacetSelectionObject = this.dateFacetStructure();
+
+        // ensure required properties are specified
+        if(newFacetSelectionObject[self.facetSelectionEnabledProperty] === undefined) {
+          newFacetSelectionObject[self.facetSelectionEnabledProperty] = true;
+        }
+
+        if(newFacetSelectionObject[self.facetSelectionDateProperty] === undefined) {
+          newFacetSelectionObject[self.facetSelectionDateProperty] = self.formatDateToESString(self.date);
+        }
+
+        this.facets[this.facetKey] = this.facets[this.facetKey] || {};
+        this.facets[this.facetKey][key] = newFacetSelectionObject;
+
+        this.notifyPath(['facets', this.facetKey, '*'], newFacetSelectionObject);
+      },
+
+      /**
+       * Check if two dates are equal based on their elasticsearch string represetations.
+       *
+       * @param {Date} dateA
+       * @param {Date} dateB
+       * @return {Boolean}
+       * @private
+       */
+      _checkDateEquality: function(dateA, dateB) {
+        return this.formatDateToESString(dateA) === this.formatDateToESString(dateB);
+      },
+
+      /**
+       * Closes the date picker used to select a date. If a date
+       * is confirmed and it is different from the previous date,
+       * update date accordingly.
+       *
+       * @event iron-overlay-closed
+       * @private
+       */
+      _updateDate: function(newDate) {
+        if(this.date && this._checkDateEquality(this.date, newDate)) {
+          return;
+        }
+
+        this.date = newDate;
+        if(this.date) {
+          this._updateFacetSelection(this.key);
+        }
+      },
+
+      /**
+       * When facet selection changes, ensure date object is updated if needed.
+       *
+       * @private
+       */
+      _updateDisplay: function() {
+        var facetSelection = this.facets[this.facetKey];
+        // TODO Do we need to specifically check for undefined and false?  If so, add a comment.
+        if(!facetSelection ||
+            _.isEqual(facetSelection, {}) ||
+            facetSelection[this.key] === undefined ||
+            _.isEqual(facetSelection[this.key], {}) ||
+            facetSelection[this.key][this.facetSelectionEnabledProperty] === false) {
+
+          if(this.key && this.facetKey && this.date !== null) {
+            this.date = null;
+          }
+          return;
+        }
+
+        this.date = moment(facetSelection[this.key][this.facetSelectionDateProperty]).toDate();
+      }
+    });
+  </script>
+</dom-module>
