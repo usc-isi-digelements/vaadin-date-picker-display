@@ -385,9 +385,8 @@ for styling:
             _.isEqual(facetSelection[this.key], {}) ||
             facetSelection[this.key][this.facetSelectionEnabledProperty] === false) {
 
-          if(this.key && this.facetKey && this.date !== null) {
-            this.date = null;
-          }
+          this.date = null;
+          this.$.datePicker.value = null;
           return;
         }
 
