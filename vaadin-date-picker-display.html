@@ -18,6 +18,7 @@ limitations under the License.
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../lodash-import/lodash.html">
 <link rel="import" href="../moment-element/moment-with-locales-import.html">
+<link rel="import" href="../vaadin-date-picker/vaadin-date-picker.html">
 
 <!--
 A Polymer Element that displays a date picker used for filtering (uses vaadin-date-picker).
@@ -55,8 +56,8 @@ for styling:
   <template>
     <style include="iron-flex"></style>
     <div class="horizontal layout">
-      <vaadin-date-picker id="[[key]]"></vaadin-date-picker>
-      [[_createEventListener(key)]]
+      <vaadin-date-picker id="datePicker"></vaadin-date-picker>
+      [[_createEventListener()]]
     </div>
   </template>
 
@@ -224,6 +225,19 @@ for styling:
         },
 
         /**
+         * (Optional)
+         *
+         * Format for vaadin-date-picker
+         *
+         * @type {String}
+         * @default 'YYYY-MM-DD'
+         */
+        vaadinDateFormat: {
+          type: String,
+          value: 'YYYY-MM-DD'
+        },
+
+        /**
          * (Output)
          *
          * Label for current date to use on date picker button
@@ -285,14 +299,13 @@ for styling:
        * @param {String} id (the id of the date object)
        * @private
        */
-      _createEventListener: function (id) {
+      _createEventListener: function () {
         var display = this;
-
         async function addEvent(ms) {
           await new Promise(resolve => setTimeout(resolve, ms));
-          var datePicker = document.querySelector('#'+id);
-          datePicker.addEventListener('value-changed', function() {
-            display._updateDate(this.value);
+
+          display.$.datePicker.addEventListener('value-changed', function() {
+            display._updateDate();
           });       
         }
         addEvent(100);
@@ -346,7 +359,8 @@ for styling:
        * @event iron-overlay-closed
        * @private
        */
-      _updateDate: function(newDate) {
+      _updateDate: function() {
+        var newDate = this.$.datePicker.value;
         if(this.date && this._checkDateEquality(this.date, newDate)) {
           return;
         }
@@ -378,6 +392,7 @@ for styling:
         }
 
         this.date = moment(facetSelection[this.key][this.facetSelectionDateProperty]).toDate();
+        this.$.datePicker.value = moment(facetSelection[this.key][this.facetSelectionDateProperty]).format(this.vaadinDateFormat);
       }
     });
   </script>
