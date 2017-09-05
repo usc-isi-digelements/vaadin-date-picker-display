@@ -17,9 +17,7 @@ var facets = {
   facet-key="dates"
   facets="{{facets}}"
   key="dateStart"
-  title="Date From"
-  prefix-label="From"
-  date-identifier="start">
+  title="Date From">
 </vaadin-date-picker-display>
 ```
 
