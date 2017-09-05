@@ -38,9 +38,7 @@ var facets = {
   facet-key="dates"
   facets="{{facets}}"
   key="dateStart"
-  title="Date From"
-  prefix-label="From"
-  date-identifier="start">
+  category="Date From">
 </vaadin-date-picker-display>
 ```
 
@@ -67,7 +65,7 @@ for styling:
     </style>
 
     <div class="horizontal layout">
-      <vaadin-date-picker id="datePicker" label="Click to select [[dateIdentifier]] date"></vaadin-date-picker>
+      <vaadin-date-picker id="datePicker" label="[[category]]"></vaadin-date-picker>
       [[_createEventListener()]]
     </div>
   </template>
@@ -149,29 +147,7 @@ for styling:
          *
          * @type {String}
          */
-        title: {
-          type: String
-        },
-
-        /**
-         * (Required)
-         *
-         * Prefix to use for label (e.g. "From" or "To")
-         *
-         * @type {String}
-         */
-        prefixLabel: {
-          type: String
-        },
-
-        /**
-         * (Required)
-         *
-         * Date identifier (e.g. "begin" or "end")
-         *
-         * @type {String}
-         */
-        dateIdentifier: {
+        category: {
           type: String
         },
 
@@ -185,7 +161,7 @@ for styling:
          *   &nbsp;&nbsp;&nbsp;&nbsp;text: this.formatDate(this.date, this.facetLabelFormat) (ex: '04/04/2017'),<br/>
          *   &nbsp;&nbsp;&nbsp;&nbsp;date: this.formatDateToESString(date) (ex: '2017-04-04T00:00:00'),<br/>
          *   &nbsp;&nbsp;&nbsp;&nbsp;enabled: true,<br/>
-         *   &nbsp;&nbsp;&nbsp;&nbsp;category: this.title<br/>
+         *   &nbsp;&nbsp;&nbsp;&nbsp;category: this.category<br/>
          * }
          *
          * If this is changed, note that the facetSelectionDateProperty (default: 'date') and
@@ -203,7 +179,7 @@ for styling:
               objectToReturn.text = this.formatDate(this.date, this.facetLabelFormat);
               objectToReturn[this.facetSelectionDateProperty] = this.formatDateToESString(this.date);
               objectToReturn[this.facetSelectionEnabledProperty] = true;
-              objectToReturn.category = this.title;
+              objectToReturn.category = this.category;
               return objectToReturn;
             };
           }
@@ -246,17 +222,6 @@ for styling:
         vaadinDateFormat: {
           type: String,
           value: 'YYYY-MM-DD'
-        },
-
-        /**
-         * (Output)
-         *
-         * Label for current date to use on date picker button
-         *
-         * @private
-         */
-        _buttonLabel: {
-          computed: '_computeLabel(prefixLabel, dateIdentifier, date)'
         }
       },
 
@@ -284,24 +249,6 @@ for styling:
        */
       formatDate: function(date, format) {
         return moment(date).format(format);
-      },
-
-      /**
-       * Creates a string representation of a date to display back to the
-       * user in the following format: August 2, 2016
-       *
-       * @param {String} prefixLabel (e.g. "From" or "To")
-       * @param {String} dateIdentifier (e.g. "begin" or "end")
-       * @param {Date} date
-       * @return {String} label to display, empty string if no date exists
-       * @private
-       */
-      _computeLabel: function(prefixLabel, dateIdentifier, date) {
-        if(date) {
-          return prefixLabel + ': ' + this.formatDate(date, 'LL');
-        } else {
-          return 'Click to set ' + dateIdentifier + ' date';
-        }
       },
 
       /**
