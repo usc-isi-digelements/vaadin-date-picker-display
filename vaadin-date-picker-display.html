@@ -301,14 +301,20 @@ for styling:
        */
       _createEventListener: function () {
         var display = this;
-        async function addEvent(ms) {
-          await new Promise(resolve => setTimeout(resolve, ms));
 
-          display.$.datePicker.addEventListener('value-changed', function() {
-            display._updateDate();
-          });       
+        function tryCreate(attemptsLeft) {
+          if(attemptsLeft >0 && display.$.datePicker) {
+            display.$.datePicker.addEventListener('value-changed', function() {
+              display._updateDate();
+            });
+          } else {
+            setTimeout( function() {
+              tryCreate(attempt+1);
+            },100);
+          }
         }
-        addEvent(100);
+        
+        tryCreate(10);
       },
 
       /**
