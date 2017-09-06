@@ -1,7 +1,7 @@
 {
   "name": "vaadin-date-picker-display",
   "description": "A Polymer Element that displays a date picker used for filtering (uses vaadin-date-picker).",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "authors": [
     "Next Century Corporation"
   ],
@@ -17,16 +17,16 @@
     "/test/"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.7.0",
-    "iron-flex-layout": "PolymerElements/iron-flex-layout#1.3.1",
+    "polymer": "Polymer/polymer#^2.0.2",
+    "iron-flex-layout": "PolymerElements/iron-flex-layout#2.0.0",
     "lodash-import": "DigElements/lodash-import#~1.0.1",
-    "moment-element": "bendavis78/moment-element#^1.1.0",
-    "vaadin-date-picker": "vaadin/vaadin-date-picker#1.2.0-alpha2"
+    "moment-element": "uxland/moment-element#^1.1.3",
+    "vaadin-date-picker": "vaadin/vaadin-date-picker#v2.0.0-alpha1"
   },
   "devDependencies": {
-    "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
-    "selected-facets-display": "DigElements/selected-facets-display#^1.0.12",
-    "web-component-tester": "^5.0.0"
+    "iron-component-page": "PolymerElements/iron-component-page#^2.0.0",
+    "selected-facets-display": "DigElements/selected-facets-display#^2.0.0",
+    "web-component-tester": "^6.0.0"
   },
   "resolutions": {
     "lodash": "~4.17.2"
