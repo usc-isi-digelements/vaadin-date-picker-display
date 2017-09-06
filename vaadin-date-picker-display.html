@@ -276,6 +276,23 @@ for styling:
       },
 
       /**
+       * Updates the facets object to remove the selected filter
+       * based on the parameters. Will call the function specfied in
+       * dateFacetStructure in order to do this.
+       *
+       * @param {String} key - identifier to use in facets object
+       * @private
+       */
+      _removeFacetSelection: function(key) {
+        if(this.facets){
+          this.facets[this.facetKey] = this.facets[this.facetKey] || {};
+          delete this.facets[this.facetKey][key];
+
+          this.notifyPath(['facets', this.facetKey, '*'], this.dateFacetStructure());
+        }
+      },
+
+      /**
        * Updates the facets object to indicate a selected filter
        * based on the parameters. Will call the function specfied in 
        * dateFacetStructure in order to do this.
@@ -330,8 +347,11 @@ for styling:
         }
 
         this.date = newDate;
+
         if(this.date) {
           this._updateFacetSelection(this.key);
+        } else if(this.facets && this.facets[this.facetKey]) {
+          this._removeFacetSelection(this.key);
         }
       },
 

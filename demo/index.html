@@ -18,56 +18,58 @@ limitations under the License.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-  <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../vaadin-date-picker-display.html">
   <link rel="import" href="../../selected-facets-display/selected-facets-display.html">
 
 </head>
 
 <body unresolved>
-  <template is="dom-bind" id="demo">
-    <div>
-      <p>date-picker-display demo (used along with selected-facets-display):</p>
+  <dom-bind>
+    <script>
+      (function(document) {
+        var domBind = document.querySelector('dom-bind');
 
-      <p>Key: 'dateStart'</p>
-      <p>Category: 'Date From'</p>
+        domBind.facets = {
+          dates: {}
+        };
+        domBind.dateKey = 'dateStart';
+        domBind.dateCategory = 'Date From';
 
-      <p>Selected Facets:
-      <span>[[displayEmpty(facets.*)]]</span>
-      <selected-facets-display
-        facet-key="dates"
-        facets="{{facets}}">
-      </selected-facets-display></p>
+        domBind.displayEmpty = function() {
+          if(!Object.keys(domBind.facets.dates).length ||
+            (domBind.facets.dates[domBind.dateKey] && !domBind.facets.dates[domBind.dateKey].enabled)) {
+            return 'None';
+          }
+        };
 
-      <br/><br/>
+      })(document);
+    </script>
+    <template is="dom-bind" id="demo">
+      <div>
+        <p>vaadin-date-picker-display demo (used along with selected-facets-display):</p>
 
-      <vaadin-date-picker-display
-        style="width: 200px;"
-        facet-key="dates"
-        facets="{{facets}}"
-        key="[[dateKey]]"
-        category="[[dateCategory]]">
-      </vaadin-date-picker-display>
-    </div>
-  </template>
-  <script>
-    (function(document) {
-      var demo = document.querySelector('#demo');
+        <p>Key: 'dateStart'</p>
+        <p>Category: 'Date From'</p>
 
-      demo.facets = {
-        dates: {}
-      };
-      demo.dateKey = 'dateStart';
-      demo.dateCategory = 'Date From';
+        <p>Selected Facets:
+        <span>[[displayEmpty(facets.*)]]</span>
+        <selected-facets-display
+          facet-key="dates"
+          facets="{{facets}}">
+        </selected-facets-display></p>
 
-      demo.displayEmpty = function() {
-        if(!Object.keys(demo.facets.dates).length ||
-          (demo.facets.dates[demo.dateKey] && !demo.facets.dates[demo.dateKey].enabled)) {
-          return 'None';
-        }
-      };
+        <br/><br/>
 
-    })(document);
-  </script>
+        <vaadin-date-picker-display
+          style="width: 200px;"
+          facet-key="dates"
+          facets="{{facets}}"
+          key="[[dateKey]]"
+          category="[[dateCategory]]">
+        </vaadin-date-picker-display>
+      </div>
+    </template>
+  </dom-bind>
 </body>
 </html>
