@@ -59,8 +59,10 @@ for styling:
         width: 100%;
       }
 
-      vaadin-date-picker ::content paper-input-container {
-        padding: 0;
+      vaadin-date-picker {
+        /* The paper-input-container in the vaadin-date-picker has 8px top padding.  Add extra padding to total 10px top and bottom. */
+        padding-top: 2px;
+        padding-bottom: 10px;
       }
     </style>
 
