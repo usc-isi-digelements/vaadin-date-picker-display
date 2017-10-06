@@ -15,13 +15,13 @@ limitations under the License.
 -->
 
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="../vaadin-date-picker-display.html">
   <link rel="import" href="../../selected-facets-display/selected-facets-display.html">
-
 </head>
 
 <body unresolved>
@@ -45,6 +45,7 @@ limitations under the License.
 
       })(document);
     </script>
+
     <template is="dom-bind" id="demo">
       <div>
         <p>vaadin-date-picker-display demo (used along with selected-facets-display):</p>
@@ -62,7 +63,6 @@ limitations under the License.
         <br/><br/>
 
         <vaadin-date-picker-display
-          style="width: 200px;"
           facet-key="dates"
           facets="{{facets}}"
           key="[[dateKey]]"
